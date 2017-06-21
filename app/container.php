@@ -4,6 +4,7 @@ use Slim\Views\Twig;
 use Interop\Container\ContainerInterface;
 use Slim\Views\TwigExtension;
 use Slim\Interfaces\RouterInterface as Router;
+use Cart\Models\Product;
 
 return [
     Router::class => function (ContainerInterface $c) {
@@ -20,5 +21,8 @@ return [
         ));
 
         return $twig;
+    },
+    Product::class => function (ContainerInterface $c) {
+        return new Product();
     }
 ];
