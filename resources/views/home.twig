@@ -3,7 +3,7 @@
 {% block content %}
     <div class="row">
         {% for index, product in products %}
-            <div class="col-xs-12 col-md-6 col-md-4">
+            <div class="col-xs-12 col-sm-6 col-md-4">
                 {% include 'products/partials/item.twig' with {product: product} %}
             </div>
 
