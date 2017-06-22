@@ -1,7 +1,7 @@
 <?php
 
-use Slim\Views\Twig;
 use Interop\Container\ContainerInterface;
+use Slim\Views\Twig;
 use Slim\Views\TwigExtension;
 use Slim\Interfaces\RouterInterface as Router;
 use Cart\Models\Product;

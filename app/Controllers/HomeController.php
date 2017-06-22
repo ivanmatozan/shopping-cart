@@ -13,6 +13,6 @@ class HomeController
     {
         $products = $product::all();
 
-        return $view->render($response, 'home.twig');
+        return $view->render($response, 'home.twig', compact('products'));
     }
 }
