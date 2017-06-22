@@ -14,11 +14,13 @@ class CartController
 {
     protected $basket;
     protected $product;
+    protected $router;
 
-    public function __construct(Basket $basket, Product $product)
+    public function __construct(Basket $basket, Product $product, Router $router)
     {
         $this->basket = $basket;
         $this->product = $product;
+        $this->router = $router;
     }
 
     public function index(Request $request, Response $response, Twig $view)
@@ -28,12 +30,12 @@ class CartController
         $view->render($response, 'cart/index.twig');
     }
 
-    public function add(string $slug, int $quantity, Request $request, Response $response, Router $router)
+    public function add(string $slug, int $quantity, Request $request, Response $response)
     {
         $product = $this->product->where('slug', $slug)->first();
 
         if (!$product) {
-            return $response->withRedirect($router->pathFor('home'));
+            return $response->withRedirect($this->router->pathFor('home'));
         }
 
         try {
@@ -42,15 +44,15 @@ class CartController
 
         }
 
-        return $response->withRedirect($router->pathFor('cart.index'));
+        return $response->withRedirect($this->router->pathFor('cart.index'));
     }
 
-    public function update(string $slug, Request $request, Response $response, Router $router)
+    public function update(string $slug, Request $request, Response $response)
     {
         $product = $this->product->where('slug', $slug)->first();
 
         if (!$product) {
-            return $response->withRedirect($router->pathFor('home'));
+            return $response->withRedirect($this->router->pathFor('home'));
         }
 
         try {
@@ -59,6 +61,6 @@ class CartController
 
         }
 
-        return $response->withRedirect($router->pathFor('cart.index'));
+        return $response->withRedirect($this->router->pathFor('cart.index'));
     }
 }

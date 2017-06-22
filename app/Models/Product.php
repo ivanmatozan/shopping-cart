@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
+    public $quantity = null;
+
     /**
      * Check if Product low on stock (5 or less)
      *
@@ -49,5 +51,10 @@ class Product extends Model
     public function hasStock(int $quantity): bool
     {
         return $this->stock >= $quantity;
+    }
+
+    public function order()
+    {
+        return $this->belongsToMany(Order::class, 'orders_products')->withPivot('quantity');
     }
 }
