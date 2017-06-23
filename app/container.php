@@ -8,6 +8,7 @@ use Cart\Models\Product;
 use Cart\Models\Customer;
 use Cart\Models\Address;
 use Cart\Models\Order;
+use Cart\Models\Payment;
 use Cart\Support\Storage\Contracts\StorageInterface;
 use Cart\Support\Storage\SessionStorage;
 use Cart\Basket\Basket;
@@ -49,6 +50,9 @@ return [
     },
     Address::class => function (ContainerInterface $c) {
         return new Address();
+    },
+    Payment::class => function (ContainerInterface $c) {
+        return new Payment();
     },
     Basket::class => function (ContainerInterface $c) {
         return new Basket(

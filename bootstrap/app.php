@@ -27,6 +27,11 @@ $capsule->addConnection([
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
 
+Braintree_Configuration::environment('sandbox');
+Braintree_Configuration::merchantId('sg9pzbjk9s3yg82d');
+Braintree_Configuration::publicKey('6cyq6tsc7zbb5cjj');
+Braintree_Configuration::privateKey('cc911ff42ee3b31e8be05065958d7b0e');
+
 require __DIR__ . '/../app/routes.php';
 
 $app->add(new \Cart\Middleware\ValidationErrorsMiddleware($container->get(Twig::class)));

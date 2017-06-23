@@ -3,8 +3,15 @@
 namespace Cart\Controllers;
 
 use Cart\Basket\Basket;
+use Cart\Events\OrderWasCreated;
+use Cart\Handlers\EmptyBasket;
+use Cart\Handlers\MarkOrderPaid;
+use Cart\Handlers\RecordFailedPayment;
+use Cart\Handlers\RecordSuccessfulPayment;
+use Cart\Handlers\UpdateStock;
 use Cart\Models\Address;
 use Cart\Models\Customer;
+use Cart\Models\Order;
 use Cart\Validation\Contracts\ValidatorInterface;
 use Cart\Validation\Forms\OrderForm;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -44,6 +51,10 @@ class OrderController
             return $response->withRedirect($this->router->pathFor('cart.index'));
         }
 
+        if (!$request->getParam('payment_method_nonce')) {
+            return $response->withRedirect($this->router->pathFor('order.index'));
+        }
+
         $validation = $this->validator->validate($request, OrderForm::rules());
 
         if ($validation->fails()) {
@@ -78,7 +89,32 @@ class OrderController
             $this->getQuantities($allItems)
         );
 
+        $result = \Braintree_Transaction::sale([
+            'amount' => $this->basket->subTotal(),
+            'paymentMethodNonce' => $request->getParam('payment_method_nonce'),
+            'options' => [
+                'submitForSettlement' => true
+            ]
+        ]);
 
+        $event = new OrderWasCreated($order, $this->basket);
+
+        if (!$result->success) {
+            $event->attach(new RecordFailedPayment());
+            $event->dispatch();
+
+            return $response->withRedirect($this->router->pathFor('order.index'));
+        }
+
+        $event->attach([
+            new MarkOrderPaid(),
+            new RecordSuccessfulPayment($result->transaction->id),
+            new UpdateStock(),
+            new EmptyBasket()
+        ]);
+        $event->dispatch();
+
+        return $response->withRedirect($this->router->pathFor('order.show', compact('hash')));
     }
 
     protected function getQuantities($items)
@@ -90,5 +126,16 @@ class OrderController
         }
 
         return $quantities;
+    }
+
+    public function show(string $hash, Request $request, Response $response, Twig $view, Order $order)
+    {
+        $order = $order->with(['address', 'products'])->where('hash', $hash)->first();
+
+        if (!$order) {
+            return $response->withRedirect($this->router->pathFor('home'));
+        }
+
+        return $view->render($response, 'order/show.twig', compact('order'));
     }
 }
